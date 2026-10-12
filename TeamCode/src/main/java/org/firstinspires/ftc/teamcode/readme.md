@@ -29,7 +29,9 @@ teamcode/
 ├── RobotHardware.java          ← all names, settings, and motor/sensor setup
 ├── RobotTeleopMecanumDrive.java ← driver-controlled op mode
 ├── AutoPinpointDriveAndTurn.java ← autonomous: drives a square with the Pinpoint
+├── AutoEncoderDriveAndTurn.java ← autonomous: drives a path with the wheel encoders and IMU
 ├── utilities/
+│   ├── EncoderNavigator.java   ← drives a distance and turns to a heading (encoders + IMU)
 │   └── PointToPointNavigator.java ← drives to a spot and heading using the Pinpoint
 └── mechanisms/
     ├── MecanumDrive.java       ← turns forward/strafe/turn into 4 wheel powers

@@ -18,19 +18,28 @@ public class MecanumDrive {
     private final DcMotor backLeft;
     private final DcMotor backRight;
     private final double maxSpeed;
+    private final double countsPerInch;
+
+    // Encoder readings when we last called resetDistance().
+    private int frontLeftStart;
+    private int frontRightStart;
+    private int backLeftStart;
+    private int backRightStart;
 
     /**
      * @param frontLeft  the four drive motors, already set up by RobotHardware
      * @param maxSpeed   top speed from 0.0 to 1.0 (lower it for outreach events)
+     * @param countsPerInch  encoder counts for the robot to roll forward one inch
      */
     public MecanumDrive(DcMotor frontLeft, DcMotor frontRight,
                         DcMotor backLeft, DcMotor backRight,
-                        double maxSpeed) {
+                        double maxSpeed, double countsPerInch) {
         this.frontLeft = frontLeft;
         this.frontRight = frontRight;
         this.backLeft = backLeft;
         this.backRight = backRight;
         this.maxSpeed = maxSpeed;
+        this.countsPerInch = countsPerInch;
     }
 
     /**
@@ -80,6 +89,29 @@ public class MecanumDrive {
 
         // 3. Turn the angle and strength back into forward/right amounts.
         drive(strength * Math.sin(angle), strength * Math.cos(angle), rotate);
+    }
+
+    /** Starts measuring distance from here. Call before a move you want to measure. */
+    public void resetDistance() {
+        frontLeftStart = frontLeft.getCurrentPosition();
+        frontRightStart = frontRight.getCurrentPosition();
+        backLeftStart = backLeft.getCurrentPosition();
+        backRightStart = backRight.getCurrentPosition();
+    }
+
+    /**
+     * How far the robot has rolled FORWARD since resetDistance(), in inches
+     * (negative if it went backward).
+     *
+     * It averages all four wheels. When the robot strafes or turns, the wheels
+     * cancel each other out, so only forward/backward travel is counted.
+     */
+    public double getForwardInches() {
+        double totalCounts = (frontLeft.getCurrentPosition() - frontLeftStart)
+                + (frontRight.getCurrentPosition() - frontRightStart)
+                + (backLeft.getCurrentPosition() - backLeftStart)
+                + (backRight.getCurrentPosition() - backRightStart);
+        return totalCounts / 4.0 / countsPerInch;
     }
 
     /** Stops all drive motors. */

@@ -21,6 +21,11 @@ public class ImuSensor {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
 
+    /** The direction the robot is facing, in degrees (positive = turned left). */
+    public double getHeadingDegrees() {
+        return Math.toDegrees(getHeadingRadians());
+    }
+
     /** Makes the robot's current direction count as "forward" (heading 0). */
     public void resetHeading() {
         imu.resetYaw();

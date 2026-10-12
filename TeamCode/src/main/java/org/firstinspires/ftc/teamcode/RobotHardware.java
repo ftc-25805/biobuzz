@@ -110,6 +110,20 @@ public class RobotHardware {
     /** How close (in RPM) the flywheel must be to its target to count as "at speed". */
     public static final double FLYWHEEL_TOLERANCE_RPM = 50.0;
 
+    /**
+     * Drivetrain measurements, used to turn encoder counts into inches.
+     * TODO: CHECK AGAINST OUR MOTORS AND WHEELS.
+     * Counts per motor turn: see the motor spec sheet (537.7 is a goBILDA 312 RPM motor).
+     * Gear reduction: 1.0 if the motor drives the wheel directly.
+     * Wheel diameter: 104 mm goBILDA mecanum wheels = 4.09 inches.
+     */
+    public static final double DRIVE_COUNTS_PER_MOTOR_REV = 537.7;
+    public static final double DRIVE_GEAR_REDUCTION = 1.0;
+    public static final double DRIVE_WHEEL_DIAMETER_INCHES = 4.09;
+    public static final double DRIVE_COUNTS_PER_INCH =
+            (DRIVE_COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION)
+                    / (DRIVE_WHEEL_DIAMETER_INCHES * Math.PI);
+
     /** How the Control Hub is mounted on the robot. */
     public static final RevHubOrientationOnRobot.LogoFacingDirection HUB_LOGO_DIRECTION =
             RevHubOrientationOnRobot.LogoFacingDirection.UP;
@@ -150,7 +164,8 @@ public class RobotHardware {
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        drive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight, MAX_DRIVE_SPEED);
+        drive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight,
+                MAX_DRIVE_SPEED, DRIVE_COUNTS_PER_INCH);
 
         // --- IMU (tells us which way the robot is facing) ---
         IMU imuHardware = hardwareMap.get(IMU.class, IMU_NAME);
