@@ -28,6 +28,9 @@ op mode keeps working.
 teamcode/
 ├── RobotHardware.java          ← all names, settings, and motor/sensor setup
 ├── RobotTeleopMecanumDrive.java ← driver-controlled op mode
+├── AutoPinpointDriveAndTurn.java ← autonomous: drives a square with the Pinpoint
+├── utilities/
+│   └── PointToPointNavigator.java ← drives to a spot and heading using the Pinpoint
 └── mechanisms/
     ├── MecanumDrive.java       ← turns forward/strafe/turn into 4 wheel powers
     ├── Flywheel.java           ← spins a launcher wheel at a target RPM
