@@ -5,6 +5,7 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.ArrayList;
@@ -25,13 +26,22 @@ import java.util.List;
  */
 public class LimelightCamera {
     private final Limelight3A limelight;
+    private final double cameraHeightInches;
+    private final double cameraMountAngleDegrees;
 
     /** The newest answer from the camera. Can be null if the camera hasn't sent anything yet. */
     private LLResult result;
 
-    /** @param limelight the Limelight, already set up and started by RobotHardware */
-    public LimelightCamera(Limelight3A limelight) {
+    /**
+     * @param limelight                the Limelight, already set up and started by RobotHardware
+     * @param cameraHeightInches        height of the camera lens above the floor
+     * @param cameraMountAngleDegrees   how far the camera is tilted UP from level (0 = looking straight ahead)
+     */
+    public LimelightCamera(Limelight3A limelight,
+                           double cameraHeightInches, double cameraMountAngleDegrees) {
         this.limelight = limelight;
+        this.cameraHeightInches = cameraHeightInches;
+        this.cameraMountAngleDegrees = cameraMountAngleDegrees;
     }
 
     /** Gets the newest answer from the camera. Call once per loop. */
@@ -94,6 +104,46 @@ public class LimelightCamera {
             for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
                 if (tag.getFiducialId() == tagId) {
                     return tag.getTargetXDegrees();
+                }
+            }
+        }
+        return 0.0;
+    }
+
+    /**
+     * How far away the target is, in inches, worked out from how high it appears
+     * in the camera's picture. Works for any target (AprilTag, color blob, ...)
+     * as long as you know how high the target is off the floor.
+     *
+     * The higher the target appears (bigger ty), the closer it is. This is just
+     * trigonometry: we know the camera's height and tilt, the target's height,
+     * and the angle up to the target.
+     *
+     * Returns 0 if there is no target or the answer doesn't make sense. If the distance
+     * is always wrong, check the camera height and mount angle in RobotHardware.
+     *
+     * @param targetHeightInches height of the CENTER of the target above the floor
+     */
+    public double getDistanceInches(double targetHeightInches) {
+        if (!hasTarget()) {
+            return 0.0;
+        }
+        double angleToTarget = Math.toRadians(cameraMountAngleDegrees + result.getTy());
+        double distance = (targetHeightInches - cameraHeightInches) / Math.tan(angleToTarget);
+        return (Double.isFinite(distance) && distance > 0) ? distance : 0.0;
+    }
+
+    /**
+     * How far away a specific AprilTag is, in inches, in a straight line from the camera.
+     * AprilTags carry their own size, so the Limelight can measure this directly.
+     * Check {@link #canSeeTag(int)} first; returns 0 if the tag isn't visible.
+     */
+    public double getTagDistanceInches(int tagId) {
+        if (hasTarget()) {
+            for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
+                if (tag.getFiducialId() == tagId) {
+                    Position p = tag.getTargetPoseCameraSpace().getPosition().toUnit(DistanceUnit.INCH);
+                    return Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
                 }
             }
         }

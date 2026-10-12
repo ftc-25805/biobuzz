@@ -73,6 +73,14 @@ public class RobotHardware {
     public static final GoBildaPinpointDriver.EncoderDirection PINPOINT_Y_DIRECTION =
             GoBildaPinpointDriver.EncoderDirection.FORWARD;
 
+    /**
+     * Where the Limelight is mounted. TODO: MEASURE ON OUR ROBOT.
+     * Height: floor to the camera lens. Mount angle: how far it tilts UP from level
+     * (0 = looking straight ahead). Needed for getDistanceInches().
+     */
+    public static final double LIMELIGHT_HEIGHT_INCHES = 10.0;
+    public static final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 20.0;
+
     /** Which Limelight pipeline to use when the robot starts (set up on the Limelight web page). */
     public static final int LIMELIGHT_START_PIPELINE = 0;
 
@@ -188,7 +196,8 @@ public class RobotHardware {
         limelightHardware.pipelineSwitch(LIMELIGHT_START_PIPELINE);
         limelightHardware.start();
 
-        limelight = new LimelightCamera(limelightHardware);
+        limelight = new LimelightCamera(limelightHardware,
+                LIMELIGHT_HEIGHT_INCHES, LIMELIGHT_MOUNT_ANGLE_DEGREES);
 
         // --- Flywheel (launches game pieces) ---
         DcMotorEx flywheelMotor = hardwareMap.get(DcMotorEx.class, FLYWHEEL_NAME);

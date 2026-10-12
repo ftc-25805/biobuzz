@@ -39,6 +39,20 @@ public class RobotTeleopMecanumDrive extends OpMode {
         double rotate = gamepad1.right_stick_x;
 
         // robot.drive.driveFieldRelative(forward, right, rotate, robot.imu.getHeadingRadians());
+
+        // AUTO-AIM (optional): hold the right bumper and the robot turns by itself to face
+        // what the Limelight sees, while you keep driving with the left joystick.
+        // To use it:
+        //   1) Add a field:   private TargetAligner aligner;
+        //      (and import org.firstinspires.ftc.teamcode.utilities.TargetAligner)
+        //   2) In init():     aligner = new TargetAligner(robot.drive, robot.limelight);
+        //   3) Replace the drive line below with:
+        //
+        // if (gamepad1.right_bumper) {
+        //     aligner.update(forward, right);   // you move, the robot aims
+        // } else {
+        //     robot.drive.drive(forward, right, rotate);
+        // }
         robot.drive.drive(forward, right, rotate);
     }
 
