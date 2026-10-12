@@ -30,6 +30,7 @@ teamcode/
 ├── RobotTeleopMecanumDrive.java ← driver-controlled op mode
 └── mechanisms/
     ├── MecanumDrive.java       ← turns forward/strafe/turn into 4 wheel powers
+    ├── Flywheel.java           ← spins a launcher wheel at a target RPM
     ├── ImuSensor.java          ← tells us which way the robot is facing
     ├── LimelightCamera.java    ← smart camera that finds AprilTags and targets
     └── PinpointOdometry.java   ← tells us where the robot is on the field (goBILDA Pinpoint)

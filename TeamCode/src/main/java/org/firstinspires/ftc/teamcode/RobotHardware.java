@@ -4,11 +4,13 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import org.firstinspires.ftc.teamcode.mechanisms.Flywheel;
 import org.firstinspires.ftc.teamcode.mechanisms.ImuSensor;
 import org.firstinspires.ftc.teamcode.mechanisms.LimelightCamera;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
@@ -42,6 +44,7 @@ public class RobotHardware {
     public static final String IMU_NAME = "imu";
     public static final String PINPOINT_NAME = "pinpoint";
     public static final String LIMELIGHT_NAME = "limelight";
+    public static final String FLYWHEEL_NAME = "flywheel";
 
     // ---------------------------------------------------------------------
     // Tuning values. Change these to fit the robot.
@@ -68,6 +71,32 @@ public class RobotHardware {
     /** Which Limelight pipeline to use when the robot starts (set up on the Limelight web page). */
     public static final int LIMELIGHT_START_PIPELINE = 0;
 
+    /**
+     * Encoder ticks per turn of the flywheel. TODO: CHECK OUR MOTOR'S SPEC SHEET (and any gearing).
+     * 28 is a bare goBILDA 5000-series motor with no gearbox.
+     */
+    public static final double FLYWHEEL_TICKS_PER_REV = 28.0;
+
+    /** The flywheel's top speed in RPM (motor free speed). Used to work out the starting F value below. */
+    public static final double FLYWHEEL_MAX_RPM = 6000.0;
+
+    /**
+     * Flywheel PIDF coefficients, used to hold the target speed. TODO: TUNE ON OUR ROBOT.
+     * These are a common starting point, not final answers:
+     *   F (feedforward): the main push toward the target. 32767 divided by top speed in ticks per second.
+     *   P (proportional): fixes the remaining error. Start at 10% of F.
+     *   I (integral):     removes steady leftover error. Start at 1% of P, or leave 0.
+     *   D (derivative):   calms oscillation. Usually leave 0.
+     * Tune F first, then raise P until it reaches speed fast without wobbling.
+     */
+    public static final double FLYWHEEL_F = 32767.0 / (FLYWHEEL_MAX_RPM / 60.0 * FLYWHEEL_TICKS_PER_REV);
+    public static final double FLYWHEEL_P = 0.1 * FLYWHEEL_F;
+    public static final double FLYWHEEL_I = 0.01 * FLYWHEEL_P;
+    public static final double FLYWHEEL_D = 0.0;
+
+    /** How close (in RPM) the flywheel must be to its target to count as "at speed". */
+    public static final double FLYWHEEL_TOLERANCE_RPM = 50.0;
+
     /** How the Control Hub is mounted on the robot. */
     public static final RevHubOrientationOnRobot.LogoFacingDirection HUB_LOGO_DIRECTION =
             RevHubOrientationOnRobot.LogoFacingDirection.UP;
@@ -81,6 +110,7 @@ public class RobotHardware {
     public final ImuSensor imu;
     public final PinpointOdometry odometry;
     public final LimelightCamera limelight;
+    public final Flywheel flywheel;
 
     /**
      * Finds and sets up all the robot's hardware.
@@ -129,11 +159,24 @@ public class RobotHardware {
         limelightHardware.start();
 
         limelight = new LimelightCamera(limelightHardware);
+
+        // --- Flywheel (launches game pieces) ---
+        DcMotorEx flywheelMotor = hardwareMap.get(DcMotorEx.class, FLYWHEEL_NAME);
+        // If the flywheel spins the wrong way, change this to REVERSE.
+        flywheelMotor.setDirection(DcMotor.Direction.FORWARD);
+        // FLOAT lets it coast down instead of braking hard, which is easier on the motor.
+        flywheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        // RUN_USING_ENCODER lets us set a speed instead of a power.
+        flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        flywheel = new Flywheel(flywheelMotor, FLYWHEEL_TICKS_PER_REV, FLYWHEEL_TOLERANCE_RPM);
+        flywheel.setPidf(FLYWHEEL_P, FLYWHEEL_I, FLYWHEEL_D, FLYWHEEL_F);
     }
 
     /** Stops everything that moves or runs. Add new mechanisms here as you create them. */
     public void stop() {
         drive.stop();
+        flywheel.stop();
         limelight.stop();
     }
 }
