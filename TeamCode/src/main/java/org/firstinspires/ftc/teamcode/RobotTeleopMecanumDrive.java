@@ -26,7 +26,7 @@ public class RobotTeleopMecanumDrive extends OpMode {
 
         // Pressing A makes the way the robot is currently pointing count as "forward".
         if (gamepad1.a) {
-            robot.resetHeading();
+            robot.imu.resetHeading();
         }
 
         // Pushing a joystick forward gives a NEGATIVE y value, so we flip it.
@@ -34,7 +34,8 @@ public class RobotTeleopMecanumDrive extends OpMode {
         double right = gamepad1.left_stick_x;
         double rotate = gamepad1.right_stick_x;
 
-        robot.driveFieldRelative(forward, right, rotate);
+        //robot.drive.driveFieldRelative(forward, right, rotate, robot.imu.getHeadingRadians());
+        robot.drive.drive(forward, right, rotate);
     }
 
     @Override

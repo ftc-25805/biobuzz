@@ -1,10 +1,110 @@
+# Team 25805 BioBuzz: Robot Code Guide
+
+Welcome to the team's robot code! This page explains how the code is organized so you
+can find things quickly and add to it without breaking it.
+
+## The big idea
+
+Our code is split into three kinds of pieces. Each piece has one job:
+
+| Piece | Job | Where it lives |
+|-------|-----|----------------|
+| **Op modes** | Decide *what the robot should do* (read the gamepad, run an autonomous routine) | `teamcode/` |
+| **RobotHardware** | Knows *what parts the robot has* and how they are wired and set up | `teamcode/RobotHardware.java` |
+| **Mechanisms** | Know *how to use a part* (the drivetrain, the IMU, an arm...) | `teamcode/mechanisms/` |
+
+```
+ Op mode  ──asks──▶  RobotHardware  ──holds──▶  Mechanisms  ──use──▶  Motors & sensors
+(the driver)       (the robot)               (drive, imu, ...)
+```
+
+**An op mode never touches a motor directly.** It only talks to `robot.drive`, `robot.imu`,
+and so on. That way, if a motor gets rewired or renamed, we fix it in one place and every
+op mode keeps working.
+
+## Files
+
+```
+teamcode/
+├── RobotHardware.java          ← all names, settings, and motor/sensor setup
+├── RobotTeleopMecanumDrive.java ← driver-controlled op mode
+└── mechanisms/
+    ├── MecanumDrive.java       ← turns forward/strafe/turn into 4 wheel powers
+    └── ImuSensor.java          ← tells us which way the robot is facing
+```
+
+## How an op mode uses the robot
+
+```java
+@TeleOp(name = "My TeleOp", group = "Robot")
+public class MyTeleop extends OpMode {
+    private RobotHardware robot;
+
+    @Override
+    public void init() {
+        robot = new RobotHardware(hardwareMap);   // sets up everything
+    }
+
+    @Override
+    public void loop() {
+        robot.drive.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+    }
+
+    @Override
+    public void stop() {
+        robot.stop();                             // stop all motors
+    }
+}
+```
+
+## Common jobs
+
+### Change a setting (name, speed, direction)
+Open `RobotHardware.java`. The names and tuning values are at the top, and the motor setup
+(directions, encoder modes) is in the constructor.
+
+- **A motor name changed in the Driver Station config:** edit the `..._NAME` constants.
+- **The robot is too fast for an outreach event:** lower `MAX_DRIVE_SPEED` (0.0 to 1.0).
+- **A wheel spins the wrong way:** flip its `setDirection(...)` line in the constructor.
+- **Robot turns the wrong way for field-relative driving:** check `HUB_LOGO_DIRECTION` and
+  `HUB_USB_DIRECTION` match how the Control Hub is mounted.
+
+### Add a new mechanism (arm, claw, intake, shooter...)
+1. **Write the class** in `mechanisms/`. It takes its motors or sensors in its
+   **constructor** and has methods that say what it does (`raise()`, `grab()`, ...).
+   It never calls `hardwareMap` and never uses a config name. Use `MecanumDrive` as a model.
+2. **Add its settings** (names, speeds, limits) to the top of `RobotHardware`.
+3. **Set it up in the `RobotHardware` constructor:** get the motors from `hardwareMap`,
+   configure them, and create the mechanism.
+4. **Add a public field**, e.g. `public final Arm arm;`
+5. **Stop it safely:** add a line to `RobotHardware.stop()` if it moves.
+6. **Use it in an op mode:** `robot.arm.raise();`
+
+### Add a new op mode
+Copy `RobotTeleopMecanumDrive.java`, rename it, and change the `@TeleOp(name = ...)` text.
+Remove the `@Disabled` line so it shows up on the Driver Station.
+
+## Rules of thumb
+
+- **One job per class.** If a class is doing two things, split it.
+- **Names say what things do.** `driveFieldRelative` beats `dfr`.
+- **No magic numbers.** Put a number with a meaning (a speed, a position) in a named constant
+  in `RobotHardware`, not buried in the middle of a method.
+- **Comment the *why*,** not just the *what*.
+- **Test on the robot in small steps.** Change one thing, try it, then move on.
+
+---
+
+# FTC SDK Notes
+
+*The rest of this file is the standard information that comes with the FTC SDK.*
+
 ## TeamCode Module
 
 Welcome!
 
 This module, TeamCode, is the place where you will write/paste the code for your team's
-robot controller App. This module is currently empty (a clean slate) but the
-process for adding OpModes is straightforward.
+robot controller App. The process for adding OpModes is straightforward.
 
 ## Creating your own OpModes
 
