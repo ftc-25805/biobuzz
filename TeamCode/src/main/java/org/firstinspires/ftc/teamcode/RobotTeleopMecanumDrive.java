@@ -24,8 +24,9 @@ public class RobotTeleopMecanumDrive extends OpMode {
         telemetry.addLine("The left joystick sets the robot direction");
         telemetry.addLine("Moving the right joystick left and right turns the robot");
 
-        // The Pinpoint needs to be updated once every loop.
+        // The Pinpoint and Limelight need to be updated once every loop.
         robot.odometry.update();
+        robot.limelight.update();
 
         // Pressing A makes the way the robot is currently pointing count as "forward".
         if (gamepad1.a) {

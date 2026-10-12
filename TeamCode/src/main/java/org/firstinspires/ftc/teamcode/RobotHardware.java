@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import org.firstinspires.ftc.teamcode.mechanisms.ImuSensor;
+import org.firstinspires.ftc.teamcode.mechanisms.LimelightCamera;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.PinpointOdometry;
 
@@ -39,6 +41,7 @@ public class RobotHardware {
     public static final String BACK_RIGHT_NAME = "back_right_drive";
     public static final String IMU_NAME = "imu";
     public static final String PINPOINT_NAME = "pinpoint";
+    public static final String LIMELIGHT_NAME = "limelight";
 
     // ---------------------------------------------------------------------
     // Tuning values. Change these to fit the robot.
@@ -62,6 +65,9 @@ public class RobotHardware {
     public static final GoBildaPinpointDriver.EncoderDirection PINPOINT_Y_DIRECTION =
             GoBildaPinpointDriver.EncoderDirection.FORWARD;
 
+    /** Which Limelight pipeline to use when the robot starts (set up on the Limelight web page). */
+    public static final int LIMELIGHT_START_PIPELINE = 0;
+
     /** How the Control Hub is mounted on the robot. */
     public static final RevHubOrientationOnRobot.LogoFacingDirection HUB_LOGO_DIRECTION =
             RevHubOrientationOnRobot.LogoFacingDirection.UP;
@@ -74,6 +80,7 @@ public class RobotHardware {
     public final MecanumDrive drive;
     public final ImuSensor imu;
     public final PinpointOdometry odometry;
+    public final LimelightCamera limelight;
 
     /**
      * Finds and sets up all the robot's hardware.
@@ -115,10 +122,18 @@ public class RobotHardware {
         pinpoint.resetPosAndIMU();  // robot must be sitting still when this runs
 
         odometry = new PinpointOdometry(pinpoint);
+
+        // --- Limelight camera (finds AprilTags and other targets) ---
+        Limelight3A limelightHardware = hardwareMap.get(Limelight3A.class, LIMELIGHT_NAME);
+        limelightHardware.pipelineSwitch(LIMELIGHT_START_PIPELINE);
+        limelightHardware.start();
+
+        limelight = new LimelightCamera(limelightHardware);
     }
 
-    /** Stops everything that moves. Add new mechanisms here as you create them. */
+    /** Stops everything that moves or runs. Add new mechanisms here as you create them. */
     public void stop() {
         drive.stop();
+        limelight.stop();
     }
 }
