@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * Driver-controlled mecanum drive. This op mode only reads the gamepad.
  * All the motor and sensor details live in {@link RobotHardware}.
  */
-@TeleOp(name = "Robot: Field Relative Mecanum Drive", group = "Robot")
+@TeleOp(name = "Robot: Field Relative Mecanum Drive" )
 @Disabled
 public class RobotTeleopMecanumDrive extends OpMode {
     private RobotHardware robot;

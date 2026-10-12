@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.utilities.EncoderNavigator;
  * Before running: clear about 4 feet in front and to the sides, and test with the
  * robot up on blocks first!
  */
-@Autonomous(name = "Auto: Encoder Drive and Turn", group = "Robot")
+@Autonomous(name = "Auto: Encoder Drive and Turn", group = "Encoder")
 public class AutoEncoderDriveAndTurn extends LinearOpMode {
 
     /** Give up on a move after this long so a stuck robot doesn't freeze the whole auto. */

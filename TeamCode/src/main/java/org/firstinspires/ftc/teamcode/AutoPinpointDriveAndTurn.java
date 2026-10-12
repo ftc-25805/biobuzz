@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.utilities.PointToPointNavigator;
  * Before running: put the robot on the field, hold it still until init finishes,
  * and clear 3 feet in front and to the left of it. Test with the robot up on blocks first!
  */
-@Autonomous(name = "Auto: Pinpoint Drive and Turn", group = "Robot")
+@Autonomous(name = "Auto: Pinpoint Drive and Turn", group = "Pinpoint")
 public class AutoPinpointDriveAndTurn extends LinearOpMode {
 
     /** How long autonomous lasts. */
