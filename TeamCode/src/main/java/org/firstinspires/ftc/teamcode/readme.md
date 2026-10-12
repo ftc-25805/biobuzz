@@ -32,6 +32,8 @@ teamcode/
 ├── AutoEncoderDriveAndTurn.java ← autonomous: drives a path with the wheel encoders and IMU
 ├── utilities/
 │   ├── EncoderNavigator.java   ← drives a distance and turns to a heading (encoders + IMU)
+│   ├── FlywheelPIDFTuner.java  ← TeleOp (group "Utils"): tune flywheel P and F live
+│   ├── FlywheelVelocityTuner.java ← TeleOp (group "Utils"): find the RPM that makes a good shot
 │   ├── PointToPointNavigator.java ← drives to a spot and heading using the Pinpoint
 │   └── TargetAligner.java      ← turns the robot to face what the Limelight sees
 └── mechanisms/
