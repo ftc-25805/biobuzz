@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import org.firstinspires.ftc.teamcode.mechanisms.Flywheel;
 import org.firstinspires.ftc.teamcode.mechanisms.ImuSensor;
+import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.LimelightCamera;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.PinpointOdometry;
@@ -45,6 +46,7 @@ public class RobotHardware {
     public static final String PINPOINT_NAME = "pinpoint";
     public static final String LIMELIGHT_NAME = "limelight";
     public static final String FLYWHEEL_NAME = "flywheel";
+    public static final String INTAKE_NAME = "intake";
 
     // ---------------------------------------------------------------------
     // Tuning values. Change these to fit the robot.
@@ -76,6 +78,10 @@ public class RobotHardware {
      * 28 is a bare goBILDA 5000-series motor with no gearbox.
      */
     public static final double FLYWHEEL_TICKS_PER_REV = 28.0;
+
+    /** Intake motor power from 0.0 to 1.0, for pulling game elements in and pushing them out. */
+    public static final double INTAKE_COLLECT_POWER = 1.0;
+    public static final double INTAKE_EJECT_POWER = 0.6;
 
     /** The flywheel's top speed in RPM (motor free speed). Used to work out the starting F value below. */
     public static final double FLYWHEEL_MAX_RPM = 6000.0;
@@ -111,6 +117,7 @@ public class RobotHardware {
     public final PinpointOdometry odometry;
     public final LimelightCamera limelight;
     public final Flywheel flywheel;
+    public final Intake intake;
 
     /**
      * Finds and sets up all the robot's hardware.
@@ -171,12 +178,22 @@ public class RobotHardware {
 
         flywheel = new Flywheel(flywheelMotor, FLYWHEEL_TICKS_PER_REV, FLYWHEEL_TOLERANCE_RPM);
         flywheel.setPidf(FLYWHEEL_P, FLYWHEEL_I, FLYWHEEL_D, FLYWHEEL_F);
+
+        // --- Intake (collects game elements) ---
+        DcMotor intakeMotor = hardwareMap.get(DcMotor.class, INTAKE_NAME);
+        // If the intake pushes elements OUT when collecting, change this to REVERSE.
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        // No encoder needed. We just set a power.
+        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        intake = new Intake(intakeMotor, INTAKE_COLLECT_POWER, INTAKE_EJECT_POWER);
     }
 
     /** Stops everything that moves or runs. Add new mechanisms here as you create them. */
     public void stop() {
         drive.stop();
         flywheel.stop();
+        intake.stop();
         limelight.stop();
     }
 }
