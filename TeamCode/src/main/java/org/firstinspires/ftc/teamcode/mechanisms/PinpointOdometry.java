@@ -24,6 +24,19 @@ public class PinpointOdometry {
         this.pinpoint = pinpoint;
     }
 
+    /**
+     * True if the Pinpoint says it is working: calibrated and both pods detected.
+     * Check this during init so a loose cable is caught before the match.
+     */
+    public boolean isHealthy() {
+        return pinpoint.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY;
+    }
+
+    /** A short description of the Pinpoint's status, for telemetry (e.g. READY, FAULT_X_POD_NOT_DETECTED). */
+    public String getStatusText() {
+        return pinpoint.getDeviceStatus().toString();
+    }
+
     /** Asks the Pinpoint for fresh numbers. Call once per loop. */
     public void update() {
         pinpoint.update();

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.utilities;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.PinpointOdometry;
@@ -37,9 +39,23 @@ public class PointToPointNavigator {
     public static final double MAX_DRIVE_POWER = 0.5;
     public static final double MAX_TURN_POWER = 0.4;
 
+    /**
+     * Smallest push while still moving (0.0 to 1.0). Close to the target the proportional
+     * push gets so small the wheels can't overcome friction and the robot stalls short.
+     * This floor keeps it creeping in. Too high and it will jitter around the target.
+     */
+    public static final double MIN_DRIVE_POWER = 0.12;
+    public static final double MIN_TURN_POWER = 0.10;
+
     /** How close counts as "arrived". */
     public static final double POSITION_TOLERANCE_INCHES = 1.0;
     public static final double HEADING_TOLERANCE_DEGREES = 2.0;
+
+    /**
+     * The robot must stay within tolerance this long before a move counts as finished,
+     * so we don't stop while it is still coasting past the target.
+     */
+    public static final double SETTLE_TIME_SECONDS = 0.1;
 
     private final MecanumDrive drive;
     private final PinpointOdometry odometry;
@@ -47,6 +63,10 @@ public class PointToPointNavigator {
     private double targetXInches;
     private double targetYInches;
     private double targetHeadingRadians;
+    private double maxDrivePower = MAX_DRIVE_POWER;
+    private double maxTurnPower = MAX_TURN_POWER;
+    private final ElapsedTime settleTimer = new ElapsedTime();
+    private boolean wasInTolerance = false;
     private boolean atTarget = true;
 
     public PointToPointNavigator(MecanumDrive drive, PinpointOdometry odometry) {
@@ -62,6 +82,21 @@ public class PointToPointNavigator {
      * @param headingDegrees direction to face, in degrees turned left of the start
      */
     public void setTarget(double xInches, double yInches, double headingDegrees) {
+        setTarget(xInches, yInches, headingDegrees, MAX_DRIVE_POWER, MAX_TURN_POWER);
+    }
+
+    /**
+     * Sets a new place to go, with speed limits just for this move.
+     * Use a low limit for precise moves and a high one for long, fast travel.
+     *
+     * @param maxDrive fastest the robot may drive on this move (0.0 to 1.0)
+     * @param maxTurn  fastest the robot may turn on this move (0.0 to 1.0)
+     */
+    public void setTarget(double xInches, double yInches, double headingDegrees,
+                          double maxDrive, double maxTurn) {
+        maxDrivePower = maxDrive;
+        maxTurnPower = maxTurn;
+        wasInTolerance = false;
         targetXInches = xInches;
         targetYInches = yInches;
         targetHeadingRadians = Math.toRadians(headingDegrees);
@@ -81,15 +116,27 @@ public class PointToPointNavigator {
         double headingError =
                 AngleUnit.normalizeRadians(targetHeadingRadians - heading);
 
-        atTarget = distance <= POSITION_TOLERANCE_INCHES
+        boolean inTolerance = distance <= POSITION_TOLERANCE_INCHES
                 && Math.abs(Math.toDegrees(headingError)) <= HEADING_TOLERANCE_DEGREES;
-        if (atTarget) {
+        if (inTolerance) {
+            // Close enough. Stop pushing and wait to make sure we STAY close enough.
+            if (!wasInTolerance) {
+                settleTimer.reset();
+            }
+            wasInTolerance = true;
             drive.stop();
+            atTarget = settleTimer.seconds() >= SETTLE_TIME_SECONDS;
             return;
         }
+        wasInTolerance = false;
+        atTarget = false;
 
-        // Push toward the target: harder when far, softer when close, never over the max.
-        double power = Math.min(MAX_DRIVE_POWER, DRIVE_KP * distance);
+        // Push toward the target: harder when far, softer when close, but never under the
+        // minimum (so we keep creeping in) or over the max. If we are already close enough
+        // in position, don't push at all. We only need to finish turning.
+        boolean positionDone = distance <= POSITION_TOLERANCE_INCHES;
+        double power = positionDone
+                ? 0.0 : clamp(DRIVE_KP * distance, MIN_DRIVE_POWER, maxDrivePower);
 
         // The error is measured on the field, but the wheels need it measured from the
         // robot's point of view, so rotate it by the direction the robot is facing.
@@ -107,7 +154,9 @@ public class PointToPointNavigator {
 
         // Turn toward the target heading. The wheels' "rotate" is positive to the RIGHT
         // (clockwise), but our heading is positive to the LEFT, so flip the sign.
-        double rotate = -clamp(TURN_KP * headingError, MAX_TURN_POWER);
+        boolean headingDone = Math.abs(Math.toDegrees(headingError)) <= HEADING_TOLERANCE_DEGREES;
+        double minTurn = headingDone ? 0.0 : MIN_TURN_POWER;
+        double rotate = -clampSigned(TURN_KP * headingError, minTurn, maxTurnPower);
 
         drive.drive(forward, right, rotate);
     }
@@ -122,7 +171,19 @@ public class PointToPointNavigator {
         drive.stop();
     }
 
-    private static double clamp(double value, double limit) {
-        return Math.max(-limit, Math.min(limit, value));
+    /** Keeps value between min and max. */
+    private static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * Keeps the SIZE of value between min and max, but keeps its sign (left/right).
+     * A value of exactly 0 stays 0.
+     */
+    private static double clampSigned(double value, double min, double max) {
+        if (value == 0) {
+            return 0;
+        }
+        return Math.signum(value) * clamp(Math.abs(value), min, max);
     }
 }
