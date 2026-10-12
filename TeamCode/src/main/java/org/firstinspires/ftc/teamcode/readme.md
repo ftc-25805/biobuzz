@@ -34,7 +34,8 @@ teamcode/
     ├── ImuSensor.java          ← tells us which way the robot is facing
     ├── Intake.java             ← pulls game elements into the robot
     ├── LimelightCamera.java    ← smart camera that finds AprilTags and targets
-    └── PinpointOdometry.java   ← tells us where the robot is on the field (goBILDA Pinpoint)
+    ├── PinpointOdometry.java   ← tells us where the robot is on the field (goBILDA Pinpoint)
+    └── Transfer.java           ← continuous servo that moves game elements to the flywheel
 ```
 
 ## How an op mode uses the robot

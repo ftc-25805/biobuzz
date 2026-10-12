@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.CRServo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.LimelightCamera;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.PinpointOdometry;
+import org.firstinspires.ftc.teamcode.mechanisms.Transfer;
 
 /**
  * RobotHardware is the ONE place that knows about the robot's physical parts:
@@ -47,6 +49,7 @@ public class RobotHardware {
     public static final String LIMELIGHT_NAME = "limelight";
     public static final String FLYWHEEL_NAME = "flywheel";
     public static final String INTAKE_NAME = "intake";
+    public static final String TRANSFER_NAME = "transfer";
 
     // ---------------------------------------------------------------------
     // Tuning values. Change these to fit the robot.
@@ -83,6 +86,10 @@ public class RobotHardware {
     public static final double INTAKE_COLLECT_POWER = 1.0;
     public static final double INTAKE_EJECT_POWER = 0.6;
 
+    /** Transfer servo power from 0.0 to 1.0, for feeding game elements forward and clearing jams. */
+    public static final double TRANSFER_FEED_POWER = 1.0;
+    public static final double TRANSFER_REVERSE_POWER = 0.6;
+
     /** The flywheel's top speed in RPM (motor free speed). Used to work out the starting F value below. */
     public static final double FLYWHEEL_MAX_RPM = 6000.0;
 
@@ -118,6 +125,7 @@ public class RobotHardware {
     public final LimelightCamera limelight;
     public final Flywheel flywheel;
     public final Intake intake;
+    public final Transfer transfer;
 
     /**
      * Finds and sets up all the robot's hardware.
@@ -187,6 +195,13 @@ public class RobotHardware {
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         intake = new Intake(intakeMotor, INTAKE_COLLECT_POWER, INTAKE_EJECT_POWER);
+
+        // --- Transfer (moves game elements from the intake to the flywheel) ---
+        CRServo transferServo = hardwareMap.get(CRServo.class, TRANSFER_NAME);
+        // If the transfer pushes elements the wrong way when feeding, change this to REVERSE.
+        transferServo.setDirection(CRServo.Direction.FORWARD);
+
+        transfer = new Transfer(transferServo, TRANSFER_FEED_POWER, TRANSFER_REVERSE_POWER);
     }
 
     /** Stops everything that moves or runs. Add new mechanisms here as you create them. */
@@ -194,6 +209,7 @@ public class RobotHardware {
         drive.stop();
         flywheel.stop();
         intake.stop();
+        transfer.stop();
         limelight.stop();
     }
 }
