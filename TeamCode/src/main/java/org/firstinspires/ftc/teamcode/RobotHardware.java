@@ -1,12 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 import org.firstinspires.ftc.teamcode.mechanisms.ImuSensor;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
+import org.firstinspires.ftc.teamcode.mechanisms.PinpointOdometry;
 
 /**
  * RobotHardware is the ONE place that knows about the robot's physical parts:
@@ -34,6 +38,7 @@ public class RobotHardware {
     public static final String BACK_LEFT_NAME = "back_left_drive";
     public static final String BACK_RIGHT_NAME = "back_right_drive";
     public static final String IMU_NAME = "imu";
+    public static final String PINPOINT_NAME = "pinpoint";
 
     // ---------------------------------------------------------------------
     // Tuning values. Change these to fit the robot.
@@ -41,6 +46,21 @@ public class RobotHardware {
 
     /** Top drive speed from 0.0 to 1.0. Lower this for outreach events. */
     public static final double MAX_DRIVE_SPEED = 1.0;
+
+    /**
+     * Where the Pinpoint's odometry pods sit, measured in mm from the robot's center
+     * of rotation. TODO: MEASURE ON OUR ROBOT. These are placeholders from the SDK sample.
+     * X pod offset: sideways (left is +). Y pod offset: forward (forward is +).
+     */
+    public static final double PINPOINT_X_POD_OFFSET_MM = -84.0;
+    public static final double PINPOINT_Y_POD_OFFSET_MM = -168.0;
+    public static final GoBildaPinpointDriver.GoBildaOdometryPods PINPOINT_POD_TYPE =
+            GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
+    /** Flip to REVERSED if the numbers go DOWN when you push the robot forward (X) or left (Y). */
+    public static final GoBildaPinpointDriver.EncoderDirection PINPOINT_X_DIRECTION =
+            GoBildaPinpointDriver.EncoderDirection.FORWARD;
+    public static final GoBildaPinpointDriver.EncoderDirection PINPOINT_Y_DIRECTION =
+            GoBildaPinpointDriver.EncoderDirection.FORWARD;
 
     /** How the Control Hub is mounted on the robot. */
     public static final RevHubOrientationOnRobot.LogoFacingDirection HUB_LOGO_DIRECTION =
@@ -53,6 +73,7 @@ public class RobotHardware {
     // ---------------------------------------------------------------------
     public final MecanumDrive drive;
     public final ImuSensor imu;
+    public final PinpointOdometry odometry;
 
     /**
      * Finds and sets up all the robot's hardware.
@@ -85,6 +106,15 @@ public class RobotHardware {
                 new RevHubOrientationOnRobot(HUB_LOGO_DIRECTION, HUB_USB_DIRECTION)));
 
         imu = new ImuSensor(imuHardware);
+
+        // --- Pinpoint odometry (tells us where the robot is on the field) ---
+        GoBildaPinpointDriver pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, PINPOINT_NAME);
+        pinpoint.setOffsets(PINPOINT_X_POD_OFFSET_MM, PINPOINT_Y_POD_OFFSET_MM, DistanceUnit.MM);
+        pinpoint.setEncoderResolution(PINPOINT_POD_TYPE);
+        pinpoint.setEncoderDirections(PINPOINT_X_DIRECTION, PINPOINT_Y_DIRECTION);
+        pinpoint.resetPosAndIMU();  // robot must be sitting still when this runs
+
+        odometry = new PinpointOdometry(pinpoint);
     }
 
     /** Stops everything that moves. Add new mechanisms here as you create them. */

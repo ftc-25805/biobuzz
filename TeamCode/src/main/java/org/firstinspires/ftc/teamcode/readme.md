@@ -30,7 +30,8 @@ teamcode/
 ├── RobotTeleopMecanumDrive.java ← driver-controlled op mode
 └── mechanisms/
     ├── MecanumDrive.java       ← turns forward/strafe/turn into 4 wheel powers
-    └── ImuSensor.java          ← tells us which way the robot is facing
+    ├── ImuSensor.java          ← tells us which way the robot is facing
+    └── PinpointOdometry.java   ← tells us where the robot is on the field (goBILDA Pinpoint)
 ```
 
 ## How an op mode uses the robot
