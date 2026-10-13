@@ -1,0 +1,52 @@
+name: Unit tests
+
+# Runs the robot code's unit tests on every pull request, and on every push to main.
+# No robot needed. The tests run on GitHub's computers.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# If you push again while tests are still running, cancel the old run.
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # The FTC code builds with Android tools, so we need the Android SDK.
+      # This also accepts the SDK licenses so Gradle can download what it needs.
+      - name: Set up the Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Downloads Gradle and remembers it between runs so later runs are faster.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run the unit tests
+        run: ./gradlew :TeamCode:testDebugUnitTest --stacktrace
+
+      # Keep the test report so you can open it and see which test failed and why.
+      - name: Upload the test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: TeamCode/build/reports/tests/testDebugUnitTest/
+          if-no-files-found: ignore

@@ -22,8 +22,18 @@ android {
     packagingOptions {
         jniLibs.useLegacyPackaging true
     }
+
+    testOptions {
+        // Unit tests run on the laptop, not a phone. If code touches an Android class,
+        // return a default value instead of crashing.
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
     implementation project(':FtcRobotController')
+
+    // Unit tests (run with: ./gradlew :TeamCode:testDebugUnitTest)
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
 }
