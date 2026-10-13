@@ -106,6 +106,24 @@ Remove the `@Disabled` line so it shows up on the Driver Station.
 - **Comment the *why*,** not just the *what*.
 - **Test on the robot in small steps.** Change one thing, try it, then move on.
 
+## Testing without a robot
+
+The tests live in `TeamCode/src/test/java/...` (not in `src/main`, so they never go on the robot).
+They use fake motors and sensors, so they run on your laptop in a few seconds.
+
+```
+./gradlew :TeamCode:testDebugUnitTest
+```
+
+In Android Studio you can also right-click a test class (or the `test` folder) and choose Run.
+
+- **Every pull request and every push to `main` runs the tests automatically** on GitHub
+  (see `.github/workflows/unit-tests.yml`). A red X means a test failed. Click it to see which one.
+- **When you add or change a mechanism, add or update its test.** Copy a test from
+  `src/test/.../mechanisms/` to start. A test says what the code *should* do, so it catches
+  mistakes like a flipped sign before they cost you robot time.
+- Tests check the logic only. Tuning values (PIDF, distances, servo positions) still need the real robot.
+
 ---
 
 # FTC SDK Notes

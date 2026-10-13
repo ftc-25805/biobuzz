@@ -64,10 +64,19 @@ public class AutoPinpointDriveAndTurn extends LinearOpMode {
                 blueAlliance = true;
             }
 
+            // The status only refreshes on update(). Without this it would be stale, and
+            // we couldn't tell when the Pinpoint finishes calibrating (about 0.25 s).
+            robot.odometry.update();
+
             telemetry.addData("Alliance (B = red, X = blue)", blueAlliance ? "BLUE" : "RED");
             telemetry.addData("Pinpoint", robot.odometry.isHealthy()
-                    ? "OK" : "PROBLEM: " + robot.odometry.getStatusText());
-            telemetry.addLine("Keep the robot still, then press Play.");
+                    ? "OK" : "NOT READY: " + robot.odometry.getStatusText());
+            telemetry.addData("Pose", "x=%.2f y=%.2f heading=%.2f",
+                    robot.odometry.getXInches(), robot.odometry.getYInches(),
+                    robot.odometry.getHeadingDegrees());
+            telemetry.addData("Raw pods", "X=%d Y=%d",
+                    robot.odometry.getRawEncoderX(), robot.odometry.getRawEncoderY());
+            telemetry.addLine("Keep the robot still until the Pinpoint is OK and heading stays at 0.");
             telemetry.update();
         }
         waitForStart();

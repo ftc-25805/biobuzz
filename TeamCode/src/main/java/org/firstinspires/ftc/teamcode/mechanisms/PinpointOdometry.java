@@ -62,6 +62,20 @@ public class PinpointOdometry {
         return pinpoint.getPosition().getHeading(AngleUnit.DEGREES);
     }
 
+    /**
+     * Raw count from the X (forward) pod, before direction or scaling is applied.
+     * Push the robot forward: if this goes the wrong way for X, flip the direction in RobotHardware.
+     * If it doesn't change at all while Y's does, the pods are plugged into the wrong ports.
+     */
+    public int getRawEncoderX() {
+        return pinpoint.getEncoderX();
+    }
+
+    /** Raw count from the Y (strafe) pod. See {@link #getRawEncoderX()}. */
+    public int getRawEncoderY() {
+        return pinpoint.getEncoderY();
+    }
+
     /** Makes the robot's current spot and direction count as (0, 0) facing 0. */
     public void resetPosition() {
         setPosition(0, 0, 0);

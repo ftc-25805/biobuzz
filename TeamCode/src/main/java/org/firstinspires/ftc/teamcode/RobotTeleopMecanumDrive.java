@@ -33,6 +33,21 @@ public class RobotTeleopMecanumDrive extends OpMode {
             robot.imu.resetHeading();
         }
 
+        // Pinpoint check: press B to count the current spot as (0, 0) facing 0, then drive
+        // or push the robot and watch the numbers. See the setup steps in the goBILDA guide.
+        if (gamepad1.b) {
+            robot.odometry.resetPosition();
+        }
+        telemetry.addLine("Press B to zero the Pinpoint position");
+        telemetry.addData("Pinpoint", robot.odometry.getStatusText());
+        telemetry.addData("Pose", "x=%.2f in  y=%.2f in  heading=%.1f deg",
+                robot.odometry.getXInches(), robot.odometry.getYInches(),
+                robot.odometry.getHeadingDegrees());
+        telemetry.addData("Raw pods", "X=%d  Y=%d",
+                robot.odometry.getRawEncoderX(), robot.odometry.getRawEncoderY());
+        telemetry.addData("IMU heading", "%.1f deg", Math.toDegrees(robot.imu.getHeadingRadians()));
+        telemetry.update();
+
         // Pushing a joystick forward gives a NEGATIVE y value, so we flip it.
         double forward = -gamepad1.left_stick_y;
         double right = gamepad1.left_stick_x;
