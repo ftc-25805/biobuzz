@@ -73,7 +73,6 @@ public class AutoPinpointRedShootSecond extends LinearOpMode {
         shotTimer.reset();
         while(shotTimer.seconds() < 5) {}
         robot.flywheel.setTargetVelocity(0);
-        AutoPinpointRedShootSecond
         // move to park
         moveTo(0, 0, 0);
 

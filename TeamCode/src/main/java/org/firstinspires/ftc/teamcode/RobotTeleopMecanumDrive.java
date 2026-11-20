@@ -16,6 +16,9 @@ import org.firstinspires.ftc.teamcode.oldmechanisms.Flywheel;
 public class RobotTeleopMecanumDrive extends OpMode {
     private RobotHardware robot;
 
+    // Fraction of full speed used while slow mode is held (0.0 - 1.0).
+    private static final double SLOW_MODE_SCALE = 0.35;
+
     @Override
     public void init() {
         robot = new RobotHardware(hardwareMap);
@@ -43,6 +46,13 @@ public class RobotTeleopMecanumDrive extends OpMode {
         double right = -gamepad1.left_stick_x;
         double rotate = -gamepad1.right_stick_x;
 
+        // SLOW MODE: hold the left bumper to drive at reduced speed for fine positioning.
+        boolean slowMode = gamepad1.left_bumper;
+        if (slowMode) {
+            forward *= SLOW_MODE_SCALE;
+            right *= SLOW_MODE_SCALE;
+            rotate *= SLOW_MODE_SCALE;
+        }
 
         if (gamepad2.dpad_down) {
             robot.intake.collect();
@@ -98,6 +108,7 @@ public class RobotTeleopMecanumDrive extends OpMode {
         // }
         robot.drive.drive(forward, right, rotate);
 
+        telemetry.addData("Slow mode", slowMode ? "ON" : "off");
         telemetry.addData("flywheel velo: ", robot.flywheel.getVelocity());
         telemetry.addData("EncoderX", robot.odometry.getXInches());
         telemetry.addData("EncoderY", robot.odometry.getYInches());
