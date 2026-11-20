@@ -4,18 +4,21 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 /**
  * Driver-controlled mecanum drive. This op mode only reads the gamepad.
  * All the motor and sensor details live in {@link RobotHardware}.
  */
-@TeleOp(name = "Robot: Field Relative Mecanum Drive" )
-@Disabled
+@TeleOp(name = "Robot: Field Relative Mecanum Drive")
 public class RobotTeleopMecanumDrive extends OpMode {
     private RobotHardware robot;
 
     @Override
     public void init() {
         robot = new RobotHardware(hardwareMap);
+        robot.odometry.resetPosition();  // robot must be sitting still when this runs
     }
 
     @Override
@@ -26,11 +29,12 @@ public class RobotTeleopMecanumDrive extends OpMode {
 
         // The Pinpoint and Limelight need to be updated once every loop.
         robot.odometry.update();
-        robot.limelight.update();
+        //robot.limelight.update();
 
         // Pressing A makes the way the robot is currently pointing count as "forward".
         if (gamepad1.a) {
             robot.imu.resetHeading();
+            robot.odometry.resetPosition();
         }
 
         // Pushing a joystick forward gives a NEGATIVE y value, so we flip it.
@@ -54,6 +58,12 @@ public class RobotTeleopMecanumDrive extends OpMode {
         //     robot.drive.drive(forward, right, rotate);
         // }
         robot.drive.drive(forward, right, rotate);
+
+        telemetry.addData("EncoderX", robot.odometry.getXInches());
+        telemetry.addData("EncoderY", robot.odometry.getYInches());
+        telemetry.addData("OdoHeading", robot.odometry.getHeadingDegrees());
+        telemetry.addData("OdoHeading", robot.odometry.getStatusText());
+        telemetry.addData("OdoHeading", robot.odometry.isHealthy());
     }
 
     @Override

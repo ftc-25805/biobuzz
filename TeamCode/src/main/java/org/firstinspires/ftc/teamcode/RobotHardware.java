@@ -40,16 +40,16 @@ public class RobotHardware {
     // ---------------------------------------------------------------------
     // Names. These must match the Driver Station's robot configuration exactly.
     // ---------------------------------------------------------------------
-    public static final String FRONT_LEFT_NAME = "front_left_drive";
-    public static final String FRONT_RIGHT_NAME = "front_right_drive";
-    public static final String BACK_LEFT_NAME = "back_left_drive";
-    public static final String BACK_RIGHT_NAME = "back_right_drive";
+    public static final String FRONT_LEFT_NAME = "left_front_drive";
+    public static final String FRONT_RIGHT_NAME = "right_front_drive";
+    public static final String BACK_LEFT_NAME = "left_back_drive";
+    public static final String BACK_RIGHT_NAME = "right_back_drive";
     public static final String IMU_NAME = "imu";
-    public static final String PINPOINT_NAME = "pinpoint";
+    public static final String PINPOINT_NAME = "Odo";
     public static final String LIMELIGHT_NAME = "limelight";
-    public static final String FLYWHEEL_NAME = "flywheel";
+    public static final String FLYWHEEL_NAME = "outtake";
     public static final String INTAKE_NAME = "intake";
-    public static final String TRANSFER_NAME = "transfer";
+    public static final String TRANSFER_NAME = "intakeservo";
 
     // ---------------------------------------------------------------------
     // Tuning values. Change these to fit the robot.
@@ -63,15 +63,15 @@ public class RobotHardware {
      * of rotation. TODO: MEASURE ON OUR ROBOT. These are placeholders from the SDK sample.
      * X pod offset: sideways (left is +). Y pod offset: forward (forward is +).
      */
-    public static final double PINPOINT_X_POD_OFFSET_MM = -84.0;
-    public static final double PINPOINT_Y_POD_OFFSET_MM = -168.0;
+    public static final double PINPOINT_X_POD_OFFSET_MM = -228.0;
+    public static final double PINPOINT_Y_POD_OFFSET_MM = -228.0;
     public static final GoBildaPinpointDriver.GoBildaOdometryPods PINPOINT_POD_TYPE =
             GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
     /** Flip to REVERSED if the numbers go DOWN when you push the robot forward (X) or left (Y). */
     public static final GoBildaPinpointDriver.EncoderDirection PINPOINT_X_DIRECTION =
-            GoBildaPinpointDriver.EncoderDirection.FORWARD;
+            GoBildaPinpointDriver.EncoderDirection.REVERSED;
     public static final GoBildaPinpointDriver.EncoderDirection PINPOINT_Y_DIRECTION =
-            GoBildaPinpointDriver.EncoderDirection.FORWARD;
+            GoBildaPinpointDriver.EncoderDirection.REVERSED;
 
     /**
      * Where the Limelight is mounted. TODO: MEASURE ON OUR ROBOT.
@@ -134,9 +134,9 @@ public class RobotHardware {
 
     /** How the Control Hub is mounted on the robot. */
     public static final RevHubOrientationOnRobot.LogoFacingDirection HUB_LOGO_DIRECTION =
-            RevHubOrientationOnRobot.LogoFacingDirection.UP;
+            RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
     public static final RevHubOrientationOnRobot.UsbFacingDirection HUB_USB_DIRECTION =
-            RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
+            RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
 
     // ---------------------------------------------------------------------
     // The mechanisms
@@ -144,7 +144,7 @@ public class RobotHardware {
     public final MecanumDrive drive;
     public final ImuSensor imu;
     public final PinpointOdometry odometry;
-    public final LimelightCamera limelight;
+    //public final LimelightCamera limelight;
     public final Flywheel flywheel;
     public final Intake intake;
     public final Transfer transfer;
@@ -187,17 +187,16 @@ public class RobotHardware {
         pinpoint.setOffsets(PINPOINT_X_POD_OFFSET_MM, PINPOINT_Y_POD_OFFSET_MM, DistanceUnit.MM);
         pinpoint.setEncoderResolution(PINPOINT_POD_TYPE);
         pinpoint.setEncoderDirections(PINPOINT_X_DIRECTION, PINPOINT_Y_DIRECTION);
-        pinpoint.resetPosAndIMU();  // robot must be sitting still when this runs
 
         odometry = new PinpointOdometry(pinpoint);
 
         // --- Limelight camera (finds AprilTags and other targets) ---
-        Limelight3A limelightHardware = hardwareMap.get(Limelight3A.class, LIMELIGHT_NAME);
-        limelightHardware.pipelineSwitch(LIMELIGHT_START_PIPELINE);
-        limelightHardware.start();
+        //Limelight3A limelightHardware = hardwareMap.get(Limelight3A.class, LIMELIGHT_NAME);
+        //limelightHardware.pipelineSwitch(LIMELIGHT_START_PIPELINE);
+        //limelightHardware.start();
 
-        limelight = new LimelightCamera(limelightHardware,
-                LIMELIGHT_HEIGHT_INCHES, LIMELIGHT_MOUNT_ANGLE_DEGREES);
+        //limelight = new LimelightCamera(limelightHardware,
+        //        LIMELIGHT_HEIGHT_INCHES, LIMELIGHT_MOUNT_ANGLE_DEGREES);
 
         // --- Flywheel (launches game pieces) ---
         DcMotorEx flywheelMotor = hardwareMap.get(DcMotorEx.class, FLYWHEEL_NAME);
@@ -234,6 +233,6 @@ public class RobotHardware {
         flywheel.stop();
         intake.stop();
         transfer.stop();
-        limelight.stop();
+        //limelight.stop();
     }
 }

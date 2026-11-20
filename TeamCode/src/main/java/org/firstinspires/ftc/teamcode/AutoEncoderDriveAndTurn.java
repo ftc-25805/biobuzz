@@ -42,14 +42,14 @@ public class AutoEncoderDriveAndTurn extends LinearOpMode {
         // The path. Backward moves use a negative distance, not a negative speed.
         driveStraight(24, 0);       // forward 24 inches
         turnTo(-45);                // turn right to -45 degrees
-        holdHeading(-45, 0.5);      // pause half a second to settle
-        driveStraight(17, -45);     // forward 17 inches while holding -45 degrees
-        turnTo(45);                 // turn left to 45 degrees
-        holdHeading(45, 0.5);
-        driveStraight(17, 45);      // forward 17 inches while holding 45 degrees
-        turnTo(0);                  // turn back to face forward
-        holdHeading(0, 1.0);
-        driveStraight(-48, 0);      // backward 48 inches, back near the start
+        //holdHeading(-45, 0.5);      // pause half a second to settle
+        //driveStraight(17, -45);     // forward 17 inches while holding -45 degrees
+        //turnTo(45);                 // turn left to 45 degrees
+        //holdHeading(45, 0.5);
+        //driveStraight(17, 45);      // forward 17 inches while holding 45 degrees
+        //turnTo(0);                  // turn back to face forward
+        //holdHeading(0, 1.0);
+        //driveStraight(-48, 0);      // backward 48 inches, back near the start
 
         robot.stop();
     }

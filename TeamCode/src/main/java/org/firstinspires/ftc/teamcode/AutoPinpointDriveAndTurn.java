@@ -70,6 +70,7 @@ public class AutoPinpointDriveAndTurn extends LinearOpMode {
             telemetry.addLine("Keep the robot still, then press Play.");
             telemetry.update();
         }
+        robot.odometry.resetPosition();
         waitForStart();
         autoTimer.reset();   // the 30 seconds starts now
 
@@ -77,11 +78,11 @@ public class AutoPinpointDriveAndTurn extends LinearOpMode {
         // Once it is time to park, every moveTo below is skipped.
         //          x (in)  y (in)  heading (deg)
         moveTo(24, 0, 0);               // drive forward 24 inches
-        moveTo(24, 24, 90, 0.3, 0.3);   // slide left 24 inches, turn to face left (slow and careful)
+        //moveTo(24, 24, 90, 0.3, 0.3);   // slide left 24 inches, turn to face left (slow and careful)
         moveTo(0, 24, 180);             // drive back, turn to face backward
-        moveTo(0, 0, 0);                // return to start, facing forward
+        //moveTo(0, 0, 0);                // return to start, facing forward
 
-        park();
+        //park();
 
         robot.stop();
     }
