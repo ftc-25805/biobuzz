@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 /**
  * The transfer moves a game element from the intake to the flywheel.
@@ -12,33 +13,33 @@ import com.qualcomm.robotcore.hardware.CRServo;
  *     transfer.stop();
  */
 public class Transfer {
-    private final CRServo servo;
+    private final DcMotor motor;
     private final double feedPower;
     private final double reversePower;
 
     /**
-     * @param servo        the transfer servo, already set up by RobotHardware
+     * @param motor        the transfer motor, already set up by RobotHardware
      * @param feedPower    power for moving elements toward the flywheel, 0.0 to 1.0
      * @param reversePower power for running backward, 0.0 to 1.0
      */
-    public Transfer(CRServo servo, double feedPower, double reversePower) {
-        this.servo = servo;
+    public Transfer(DcMotor motor, double feedPower, double reversePower) {
+        this.motor = motor;
         this.feedPower = feedPower;
         this.reversePower = reversePower;
     }
 
     /** Moves game elements toward the flywheel. */
     public void feed() {
-        servo.setPower(feedPower);
+        motor.setPower(feedPower);
     }
 
     /** Runs backward. Useful for clearing a jam. */
     public void reverse() {
-        servo.setPower(-reversePower);
+        motor.setPower(-reversePower);
     }
 
     /** Stops the transfer. */
     public void stop() {
-        servo.setPower(0.0);
+        motor.setPower(0.0);
     }
 }

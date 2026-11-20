@@ -5,6 +5,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -45,11 +46,11 @@ public class RobotHardware {
     public static final String BACK_LEFT_NAME = "left_back_drive";
     public static final String BACK_RIGHT_NAME = "right_back_drive";
     public static final String IMU_NAME = "imu";
-    public static final String PINPOINT_NAME = "Odo";
+    public static final String PINPOINT_NAME = "odo";
     public static final String LIMELIGHT_NAME = "limelight";
     public static final String FLYWHEEL_NAME = "outtake";
     public static final String INTAKE_NAME = "intake";
-    public static final String TRANSFER_NAME = "intakeservo";
+    public static final String TRANSFER_NAME = "transfer";
 
     // ---------------------------------------------------------------------
     // Tuning values. Change these to fit the robot.
@@ -92,10 +93,10 @@ public class RobotHardware {
 
     /** Intake motor power from 0.0 to 1.0, for pulling game elements in and pushing them out. */
     public static final double INTAKE_COLLECT_POWER = 1.0;
-    public static final double INTAKE_EJECT_POWER = 0.6;
+    public static final double INTAKE_EJECT_POWER = 1.0;
 
     /** Transfer servo power from 0.0 to 1.0, for feeding game elements forward and clearing jams. */
-    public static final double TRANSFER_FEED_POWER = 1.0;
+    public static final double TRANSFER_FEED_POWER = 0.6;
     public static final double TRANSFER_REVERSE_POWER = 0.6;
 
     /** The flywheel's top speed in RPM (motor free speed). Used to work out the starting F value below. */
@@ -110,9 +111,9 @@ public class RobotHardware {
      *   D (derivative):   calms oscillation. Usually leave 0.
      * Tune F first, then raise P until it reaches speed fast without wobbling.
      */
-    public static final double FLYWHEEL_F = 32767.0 / (FLYWHEEL_MAX_RPM / 60.0 * FLYWHEEL_TICKS_PER_REV);
-    public static final double FLYWHEEL_P = 0.1 * FLYWHEEL_F;
-    public static final double FLYWHEEL_I = 0.01 * FLYWHEEL_P;
+    public static final double FLYWHEEL_F = 14;//32767.0 / (FLYWHEEL_MAX_RPM / 60.0 * FLYWHEEL_TICKS_PER_REV);
+    public static final double FLYWHEEL_P = 170;//0.1 * FLYWHEEL_F;
+    public static final double FLYWHEEL_I = 0.0;//0.01 * FLYWHEEL_P;
     public static final double FLYWHEEL_D = 0.0;
 
     /** How close (in RPM) the flywheel must be to its target to count as "at speed". */
@@ -134,9 +135,9 @@ public class RobotHardware {
 
     /** How the Control Hub is mounted on the robot. */
     public static final RevHubOrientationOnRobot.LogoFacingDirection HUB_LOGO_DIRECTION =
-            RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+            RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
     public static final RevHubOrientationOnRobot.UsbFacingDirection HUB_USB_DIRECTION =
-            RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+            RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
     // ---------------------------------------------------------------------
     // The mechanisms
@@ -163,14 +164,14 @@ public class RobotHardware {
         // The left motors face the opposite way from the right ones, so reverse
         // them. That way positive power means "forward" for every wheel.
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
-        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.REVERSE);
 
         // RUN_USING_ENCODER makes speed more accurate.
         // If you don't have the encoder wires plugged in, remove these.
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         drive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight,
                 MAX_DRIVE_SPEED, DRIVE_COUNTS_PER_INCH);
@@ -201,7 +202,7 @@ public class RobotHardware {
         // --- Flywheel (launches game pieces) ---
         DcMotorEx flywheelMotor = hardwareMap.get(DcMotorEx.class, FLYWHEEL_NAME);
         // If the flywheel spins the wrong way, change this to REVERSE.
-        flywheelMotor.setDirection(DcMotor.Direction.FORWARD);
+        flywheelMotor.setDirection(DcMotor.Direction.REVERSE);
         // FLOAT lets it coast down instead of braking hard, which is easier on the motor.
         flywheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         // RUN_USING_ENCODER lets us set a speed instead of a power.
@@ -220,11 +221,11 @@ public class RobotHardware {
         intake = new Intake(intakeMotor, INTAKE_COLLECT_POWER, INTAKE_EJECT_POWER);
 
         // --- Transfer (moves game elements from the intake to the flywheel) ---
-        CRServo transferServo = hardwareMap.get(CRServo.class, TRANSFER_NAME);
+        DcMotor transferMotor = hardwareMap.get(DcMotor.class, TRANSFER_NAME);
         // If the transfer pushes elements the wrong way when feeding, change this to REVERSE.
-        transferServo.setDirection(CRServo.Direction.FORWARD);
+        transferMotor.setDirection(CRServo.Direction.FORWARD);
 
-        transfer = new Transfer(transferServo, TRANSFER_FEED_POWER, TRANSFER_REVERSE_POWER);
+        transfer = new Transfer(transferMotor, TRANSFER_FEED_POWER, TRANSFER_REVERSE_POWER);
     }
 
     /** Stops everything that moves or runs. Add new mechanisms here as you create them. */

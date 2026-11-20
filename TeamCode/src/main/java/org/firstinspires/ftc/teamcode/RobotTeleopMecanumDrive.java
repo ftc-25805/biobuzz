@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.oldmechanisms.Flywheel;
 
 /**
  * Driver-controlled mecanum drive. This op mode only reads the gamepad.
@@ -38,9 +39,47 @@ public class RobotTeleopMecanumDrive extends OpMode {
         }
 
         // Pushing a joystick forward gives a NEGATIVE y value, so we flip it.
-        double forward = -gamepad1.left_stick_y;
-        double right = gamepad1.left_stick_x;
-        double rotate = gamepad1.right_stick_x;
+        double forward = gamepad1.left_stick_y;
+        double right = -gamepad1.left_stick_x;
+        double rotate = -gamepad1.right_stick_x;
+
+
+        if (gamepad2.dpad_down) {
+            robot.intake.collect();
+        } else {
+            robot.intake.stop();
+        }
+
+        if (gamepad2.dpad_up || gamepad2.left_trigger > 0) {
+            if(gamepad2.left_trigger > 0) {
+                robot.transfer.reverse();
+            } else {
+                robot.transfer.feed();
+            }
+
+        } else {
+            robot.transfer.stop();
+        }
+
+        if (gamepad2.b) {
+            robot.flywheel.setTargetVelocity(1000);
+        }
+
+        if (gamepad2.x)  {
+            robot.flywheel.setTargetVelocity(1100);
+        }
+
+        if (gamepad2.y) {
+            robot.flywheel.setTargetVelocity(1200);
+        }
+
+        if(gamepad2.right_trigger>0) {
+            robot.flywheel.setTargetVelocity(0);
+        }
+
+        if(gamepad2.a){
+            robot.flywheel.setTargetVelocity(-1000);
+        }
 
         // robot.drive.driveFieldRelative(forward, right, rotate, robot.imu.getHeadingRadians());
 
@@ -59,6 +98,7 @@ public class RobotTeleopMecanumDrive extends OpMode {
         // }
         robot.drive.drive(forward, right, rotate);
 
+        telemetry.addData("flywheel velo: ", robot.flywheel.getVelocity());
         telemetry.addData("EncoderX", robot.odometry.getXInches());
         telemetry.addData("EncoderY", robot.odometry.getYInches());
         telemetry.addData("OdoHeading", robot.odometry.getHeadingDegrees());

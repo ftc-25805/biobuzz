@@ -55,6 +55,10 @@ public class Flywheel {
         motor.setVelocity(rpm / 60.0 * ticksPerRevolution);
     }
 
+    public void setTargetVelocity(double velocity) {
+        motor.setVelocity(velocity);
+    }
+
     /** Lets the flywheel spin down. */
     public void stop() {
         setTargetRpm(0.0);
@@ -70,6 +74,9 @@ public class Flywheel {
         return motor.getVelocity() / ticksPerRevolution * 60.0;
     }
 
+    public double getVelocity() {
+        return motor.getVelocity();
+    }
     /** True once the flywheel is spinning close enough to the target to launch. */
     public boolean isAtSpeed() {
         return targetRpm > 0 && Math.abs(getRpm() - targetRpm) <= toleranceRpm;
